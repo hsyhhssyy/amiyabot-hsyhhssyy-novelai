@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "model_name": {
+      "title":"默认模型",
+      "description":"选择一个模型。",
+      "type": "string",
+      "enum":[
+        "..."
+      ]
+    },
+    "show_log": {
+      "title":"调试日志",
+      "description":"开启后将写入用于调试的大量日志。",
+      "type": "boolean"
+    }
+  }
+}
