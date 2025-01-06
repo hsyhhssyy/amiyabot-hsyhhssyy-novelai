@@ -8,94 +8,53 @@ from amiyabot import Message, Chain, log
 from core import bot as main_bot
 from amiyabot.builtin.messageChain.element import Text,Voice
 from core import AmiyaBotPluginInstance
+from src.message_handler import handle_message
 
 curr_dir = os.path.dirname(__file__)
 
-def handler(prompts):
-    log.info('SDGPTIntegrationPluginInstance handler')
-    return prompts
-
-class  SDGPTIntegrationPluginInstance(AmiyaBotPluginInstance):
+class  NovelAIPluginInstance(AmiyaBotPluginInstance):
     def load(self):
-        pass
+        extra_params = self.get_config("extra_params")
+        if extra_params is None or extra_params == "":
+            # load from file
+            paramsfile = f'{curr_dir}/accessories/default_param.json'
+            with open(paramsfile, 'r', encoding='utf-8') as f:
+                params = json.load(f)
+                extra_params_obj = params["parameters"]
+                extra_params_str = extra_params_obj
+                self.set_config("extra_params", extra_params_str)
 
-    def generate_global_schema(self):
-
-        filepath = f'{curr_dir}/accessories/global_config_schema.json'
-
-        try:
-            with open(filepath, 'r', encoding='utf-8') as file:
-                data = json.load(file)
-        except (FileNotFoundError, json.JSONDecodeError):
-            self.debug_log(f"Failed to load JSON from {filepath}.")
-            return None
-        
-        if 'amiyabot-blm-library' in main_bot.plugins.keys():
-            blm_lib = main_bot.plugins['amiyabot-blm-library']
-            
-            if blm_lib is not None:
-                model_list = blm_lib.model_list()
-
-                try:     
-                    data["properties"]["model_name"]["enum"] = [model["model_name"] for model in model_list]
-                except KeyError as e:
-                    stack_trace = traceback.format_exc()
-                    self.debug_log(f"Expected keys not found in the JSON structure: {e}\n{stack_trace}")
-                
-        return data
-
-
-def dynamic_get_global_config_schema_data():
-    if bot:
-        return bot.generate_global_schema()
-    else:
-        return f'{curr_dir}/global_config_schema.json'
-
-bot : SDGPTIntegrationPluginInstance = None
-
-def generate_global_schema(self):
-
-        filepath = f'{curr_dir}/accessories/global_config_schema.json'
-
-        try:
-            with open(filepath, 'r', encoding='utf-8') as file:
-                data = json.load(file)
-        except (FileNotFoundError, json.JSONDecodeError):
-            self.debug_log(f"Failed to load JSON from {filepath}.")
-            return None
-        
-        if 'amiyabot-blm-library' in main_bot.plugins.keys():
-            blm_lib = main_bot.plugins['amiyabot-blm-library']
-            
-            if blm_lib is not None:
-                model_list = blm_lib.model_list()
-
-                try:     
-                    data["properties"]["high_cost_model_name"]["enum"] = [model["model_name"] for model in model_list]
-                    data["properties"]["low_cost_model_name"]["enum"] =  [model["model_name"] for model in model_list if model["type"] == "low-cost"]
-                    data["properties"]["vision_model_name"]["enum"] =  [model["model_name"] for model in model_list if model["supported_feature"].__contains__("vision")]
-                except KeyError as e:
-                    stack_trace = traceback.format_exc()
-                    self.debug_log(f"Expected keys not found in the JSON structure: {e}\n{stack_trace}")
-                
-                asistant_list = blm_lib.assistant_list()
-
-                try:
-                    data["properties"]["assistant_id"]["enum"] =  [model["name"]+"["+model["id"]+"]" for model in asistant_list]
-                except KeyError as e:
-                    stack_trace = traceback.format_exc()
-                    self.debug_log(f"Expected keys not found in the JSON structure: {e}\n{stack_trace}")
-
-
-        return data
-
-bot = SDGPTIntegrationPluginInstance(
-    name='SD绘图+GPT整合插件',
+bot = NovelAIPluginInstance(
+    name='NovelAI绘图',
     version='0.1.0',
-    plugin_id='amiyabot-hsyhhssyy-sd-gpt-integration',
+    plugin_id='amiyabot-hsyhhssyy-novelai',
     plugin_type='',
     description='安装前请读一下插件文档',
     document=f'{curr_dir}/README.md',
     global_config_default=f'{curr_dir}/accessories/global_config_default.json',
-    global_config_schema = dynamic_get_global_config_schema_data
+    global_config_schema =f'{curr_dir}/accessories/global_config_schema.json',
 )
+
+def enabled_in_this_channel(channel_id:str) -> bool:
+    black_list_mode:bool = bot.get_config("black_list_mode")
+    black_white_list:list = bot.get_config("black_white_list")
+
+
+    if black_list_mode:
+        if black_white_list is not None and channel_id in black_white_list:
+            return False
+        else:
+            return True
+    else:
+        if black_white_list is not None and channel_id in black_white_list:
+            return True
+        else:
+            return False
+
+@bot.on_message(keywords=['兔兔绘1图'],level=114514)
+async def _(data: Message):
+
+    if enabled_in_this_channel(data.channel_id) == False:
+        return
+
+    await handle_message(bot,data)
