@@ -15,8 +15,8 @@
 
 即便第一次使用时也会提示已有Token是否覆盖，不要怕。
 
-![alt text](images/image-1.png)
-![alt text](images/image.png)
+![alt text](https://raw.githubusercontent.com/hsyhhssyy/amiyabot-hsyhhssyy-novelai/master/images/image-1.png)
+![alt text](https://raw.githubusercontent.com/hsyhhssyy/amiyabot-hsyhhssyy-novelai/master/images/image.png)
 
 复制token到插件的Persistent API Token配置项中。
 然后选择一个模型。
@@ -27,20 +27,20 @@
 
 如果你想调节生成参数，或者Novelai推出了新的模型，请你首先登录novelai页面，在图片生成的地方，按F12打开控制台，然后切换到网络标签。
 
-![alt text](image.png)
+![alt text](https://raw.githubusercontent.com/hsyhhssyy/amiyabot-hsyhhssyy-novelai/master/image-4.png)
 
 保持控制台打开，回到图片生成页面，调节你的各项参数以及模型，然后点击生成。
 
 切换回控制台，点击并找到网络中“generate-image”多个项目中，负载不为空的项目。
-![alt text](image-2.png)
+![alt text](https://raw.githubusercontent.com/hsyhhssyy/amiyabot-hsyhhssyy-novelai/master/image-5.png)
 
 点击 查看源 按钮，显示源
 
-![alt text](image-1.png)
+![alt text](https://raw.githubusercontent.com/hsyhhssyy/amiyabot-hsyhhssyy-novelai/master/image-1.png)
 
 复制这里面的所有内容，并保存到一个文本文件中，然后重命名为 model_name.json
 
-![alt text](image-3.png)
+![alt text](https://raw.githubusercontent.com/hsyhhssyy/amiyabot-hsyhhssyy-novelai/master/image-3.png)
 
 其中model_name可以在文件中搜索关键字model找到，比如上图例子中，就把文件命名为 nai-diffusion-4-curated-preview.json
 
