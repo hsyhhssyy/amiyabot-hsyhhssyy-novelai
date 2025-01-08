@@ -8,21 +8,43 @@ from amiyabot import Message, Chain, log
 from core import bot as main_bot
 from amiyabot.builtin.messageChain.element import Text,Voice
 from core import AmiyaBotPluginInstance
-from src.message_handler import handle_message
+from .src.message_handler import handle_message, RESOURCE_TEMPLATE_DIR, RESOURCE_DIR
+from amiyabot.log import LoggerManager
 
 curr_dir = os.path.dirname(__file__)
 
+logger = LoggerManager('NovelAI')
+
 class  NovelAIPluginInstance(AmiyaBotPluginInstance):
     def load(self):
-        extra_params = self.get_config("extra_params")
-        if extra_params is None or extra_params == "":
-            # load from file
-            paramsfile = f'{curr_dir}/accessories/default_param.json'
-            with open(paramsfile, 'r', encoding='utf-8') as f:
-                params = json.load(f)
-                extra_params_obj = params["parameters"]
-                extra_params_str = extra_params_obj
-                self.set_config("extra_params", extra_params_str)
+        pass
+
+    def debug_log(self, msg):
+        if self.get_config("show_log"):
+            logger.info(f'{msg}')
+
+bot : NovelAIPluginInstance = None
+
+def dynamic_get_global_config_schema_data():
+    file = f'{curr_dir}/accessories/global_config_schema.json'
+    obj = json.load(open(file, 'r', encoding='utf-8'))
+    
+    # 读取  RESOURCE_TEMPLATE_DIR, RESOURCE_DIR 目录下的以json结尾的文件
+    models = ["..."]
+    for file in os.listdir(RESOURCE_TEMPLATE_DIR):
+        if file.endswith('.json'):
+            models.append(file[:-5])
+    
+    for file in os.listdir(RESOURCE_DIR):
+        if file.endswith('.json'):
+            models.append(file[:-5])
+    
+    try:
+        obj["properties"]["model_name"]["enum"] = models
+    except Exception as e:
+        logger.error(f'NovelAI绘图: 配置文件构造失败: {e} {obj}')
+
+    return obj
 
 bot = NovelAIPluginInstance(
     name='NovelAI绘图',
@@ -32,7 +54,7 @@ bot = NovelAIPluginInstance(
     description='安装前请读一下插件文档',
     document=f'{curr_dir}/README.md',
     global_config_default=f'{curr_dir}/accessories/global_config_default.json',
-    global_config_schema =f'{curr_dir}/accessories/global_config_schema.json',
+    global_config_schema = dynamic_get_global_config_schema_data,
 )
 
 def enabled_in_this_channel(channel_id:str) -> bool:
